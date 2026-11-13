@@ -1,5 +1,6 @@
 
 import streamlit as st
+import model
 from model import generate_story
 
 st.set_page_config(
@@ -8,16 +9,23 @@ st.set_page_config(
     layout="centered"
 )
 
+# Debug information
 st.title("📖 TaleNova AI")
 st.subheader("Multilingual Interactive Story Generation Chatbot")
 st.write("Create and explore complete stories with AI!")
 
-# Language and Genre
+# Check which model.py and API URL are loaded
+with st.expander("Connection Information"):
+    st.write("Loaded model file:", model.__file__)
+    st.write("Current API URL:", model.API_URL)
+
+# Language selection
 language = st.selectbox(
     "Choose Language",
     ["English", "Telugu", "Kannada", "Hindi"]
 )
 
+# Genre selection
 genre = st.selectbox(
     "Choose Story Genre",
     ["Mystery", "Horror", "Fantasy", "Adventure"]
@@ -35,7 +43,7 @@ if "story_title" not in st.session_state:
 
 st.divider()
 
-# Generate Complete Story
+# Generate Story
 st.header("✨ Generate Your Story")
 
 title_labels = {
@@ -80,16 +88,18 @@ if st.button("Generate Story"):
     else:
         st.warning("Please enter a story title.")
 
-# Display Generated Story
+# Display Story
 if st.session_state.story:
 
     st.divider()
+
     st.subheader("📖 " + st.session_state.story_title)
+
     st.write(st.session_state.story)
 
 st.divider()
 
-# Ask About Your Story
+# Chatbot
 st.header("💬 Ask About Your Story")
 
 if st.session_state.story:
@@ -99,25 +109,23 @@ if st.session_state.story:
         "Telugu, Kannada or Hindi."
     )
 
-    # Display previous chat messages
+    # Previous messages
     for message in st.session_state.chat_history:
 
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-    # Chat input
+    # User question
     question = st.chat_input(
         "Ask anything about your story..."
     )
 
     if question:
 
-        st.session_state.chat_history.append(
-            {
-                "role": "user",
-                "content": question
-            }
-        )
+        st.session_state.chat_history.append({
+            "role": "user",
+            "content": question
+        })
 
         with st.chat_message("user"):
             st.write(question)
@@ -132,13 +140,10 @@ if st.session_state.story:
 
         prompt = (
             "You are TaleNova AI, a helpful multilingual story assistant. "
-            "Understand questions in any language, including English, "
-            "Telugu, Kannada and Hindi. "
+            "Understand questions in English, Telugu, Kannada and Hindi. "
             "Always answer in the selected story language: "
             + language + ". "
-            "Even if the user asks in English, answer in "
-            + language + ". "
-            "Answer clearly and accurately using the given story context. "
+            "Answer clearly using the given story context. "
             "Do not ask the user to paste the story again. "
             "Do not invent events that are not in the story.\n\n"
 
@@ -164,12 +169,10 @@ if st.session_state.story:
 
             st.write(answer)
 
-        st.session_state.chat_history.append(
-            {
-                "role": "assistant",
-                "content": answer
-            }
-        )
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": answer
+        })
 
 else:
 
